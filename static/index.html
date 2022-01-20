@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Registration</h1>
+    <form action="" id="reg-form">
+        <input type="text" autocomplete="off" id="username" placeholder="Username"/>
+        <input type="password" autocomplete="off" id="password" placeholder="password"/>
+        <input type="submit" value="Submit Form"/>
+    </form>
+
+    <script>
+        const form = document.getElementById('reg-form')
+        form.addEventListener('submit', registerUser);
+
+        //1. send data as JSON (on va utiliser ca)
+        //2. send data as urlencoded  
+        async function registerUser(event) {
+            event.preventDefault()
+            const username = document.getElementById('username').value
+            const password = document.getElementById('password').value
+
+            const result = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username,
+                    password
+                })
+            }).then((res) => res.json())
+
+            if(result.status === 'ok') {
+                alert('Success')
+            } else {
+                alert(result.error)
+            }
+        }
+    </script>
+</body>
+</html>
