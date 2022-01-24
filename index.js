@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require('path');
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser'); 
 const mongoose = require('mongoose');
 const User = require('./model/user');
 const bcrypt = require('bcryptjs');
@@ -46,19 +46,25 @@ app.post('/api/change-password', async (req, res) => {
 })
 
 app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body
-    const user = await User.findOne({ username }).lean()
+    //prendre les données rentrée par le user
+    const { /*username,*/ email, password } = req.body
 
+    //trouver le user qui match avec les données tapée par le user
+    const user = await User.findOne({ /*username,*/ email }).lean()
+
+    //Si le user n'est pas bon afficher cette erreur
     if(!user) {
-        return res.json({ status: 'error', error: 'Invalid username/password'})
+        return res.json({ status: 'error', error: 'Invalid username, email or password'})
     }
 
+    //si le password hashed est juste
     if(await bcrypt.compare(password, user.password)) {
 
         const token = jwt.sign(
             { 
             id: user._id, 
-            username: user.username 
+            //username: user.username,
+            email: user.email,
             }, 
             JWT_SECRET
         )
@@ -66,12 +72,16 @@ app.post('/api/login', async (req, res) => {
         return res.json({ status: 'ok', data: token })
     }
 
-    res.json({ status: 'error', error: 'Invalid username/password' })
+    //si le password n'est pas bon alors afficher cette errur
+    res.json({ status: 'error', error: 'Invalid username, email or password' })
 })
 
 app.post('/api/register', async (req, res) => {
-    const { username, password: plainTextPassword } = req.body
+    //prendre les datas du front-end
+    const { username, email: email, password: plainTextPassword } = req.body
 
+
+    //Verification of what the user type
     if (!username || typeof username !== 'string') {
         return res.json({ status: 'error', error: 'Invalid username' })
     }
@@ -84,6 +94,7 @@ app.post('/api/register', async (req, res) => {
         return res.json({ status: 'error', error: 'Password too small. should be atleast 6 characters' })
     }
 
+    //Hashing the password
     const password = await bcrypt.hash(plainTextPassword, 10)
 
     //console.log(await bcrypt.hash(password, 10))
@@ -91,6 +102,7 @@ app.post('/api/register', async (req, res) => {
     try {
         const response = await User.create({
             username,
+            email,
             password
         })
         console.log('USER CREATED SUCCESS',response)
