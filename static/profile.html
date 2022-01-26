@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+</head>
+<body>
+    <h1>Profile</h1>
+    <form action="" id="profile">
+        <!-- <input type="text" autocomplete="off" id="username" placeholder="Username"/>
+        <input type="email" autocomplete="off" id="email" placeholder="Email"> -->
+        <input type="text" autocomplete="off" id="fullName" placeholder="full-name"/>
+        <input type="text" autocomplete="off" id="discordId" placeholder="discord-id"/>
+        <input type="submit" value="Submit Form"/>
+    </form>
+
+    <script>
+        const form = document.getElementById('profile')
+        form.addEventListener('submit', userProfile);
+
+        //1. send data as JSON (on va utiliser ca)
+        //2. send data as urlencoded  
+        async function userProfile(event) {
+            event.preventDefault()
+            const fullName = document.getElementById('fullName').value
+            const discordId = document.getElementById('discordId').value
+
+            const result = await fetch('/api/user-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    newFullName: fullName,
+                    newDiscordId: discordId,
+                    token: localStorage.getItem('token')
+                })
+            }).then((res) => res.json())
+
+            if(result.status === 'ok') {
+                alert('Success')
+            } else {
+                alert(result.error)
+            }
+        }
+    </script>
+</body>
+</html>

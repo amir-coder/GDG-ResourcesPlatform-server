@@ -17,6 +17,25 @@ const app = express();
 app.use('/', express.static(path.join(__dirname, 'static')));
 app.use(bodyParser.json()) //decode the body if it is json
 
+app.post('/api/user-profile', async (req, res) => {
+    const { token, newFullName: fullName, newDiscordId: discordId, } = req.body
+
+    try {
+        const user = jwt.verify(token, JWT_SECRET)
+        const _id = user.id
+        // const fullName = newFullName
+        // const discordId = newDiscordId
+        await User.updateOne(
+            { _id }, 
+            { $set: { fullName },  $set: { discordId }  },
+        )
+        res.json({ status: 'ok' })
+    } catch (error) {
+        res.json({ status: 'error', error: ';);););););)' })
+    }
+
+})
+
 app.post('/api/change-password', async (req, res) => {
     const { token, newpassword: plainTextPassword  } = req.body
 
@@ -78,7 +97,7 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/register', async (req, res) => {
     //prendre les datas du front-end
-    const { username, email: email, password: plainTextPassword } = req.body
+    const { username, email, fullName, discordId, password: plainTextPassword } = req.body
 
 
     //Verification of what the user type
@@ -103,7 +122,10 @@ app.post('/api/register', async (req, res) => {
         const response = await User.create({
             username,
             email,
-            password
+            password,
+            fullName,
+            discordId,
+            
         })
         console.log('USER CREATED SUCCESS',response)
     } catch (error) {
