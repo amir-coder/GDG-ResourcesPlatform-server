@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema(
         password: { type: String, required: true },
         fullName: { type: String, },
         discordId: { type: String, },
+        isAdmin:  { type:Boolean, default:false}
     }, 
     //Ca ces la collection (table dans mySQL) dans laquelle le schema va être
     { collection: 'users' }
