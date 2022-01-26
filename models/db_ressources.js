@@ -20,6 +20,9 @@ const ressourcesSchema=mongoose.Schema({
         type: String,
         required : [true , 'please choose the type of the ressource']
     },
+    owner:{
+        type:mongoose.Types.ObjectId
+    },
     description:String,
     link:{
         type:String

@@ -1,4 +1,7 @@
 
+//requirement
+var ressourcesRoutes=require('./routes/ressources');
+require('dotenv').config();
 const express = require("express");
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -7,17 +10,31 @@ const User = require('./model/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+//global variable
+
+const port=process.env.PORT;
+const connectionUrl=process.env.CONNECTIONURL;
 const JWT_SECRET = 'fuhè_yhèoué"hezjhgçèàhjzhç_puhrjgnçpj[#`|~`ihàjoim~#|[{\||[#{|[#['
 
+/*
 mongoose.connect('mongodb+srv://AmineTech:AmineTech123@cluster0.a222q.mongodb.net/GDG-CodeIt?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedtopology: true,
     //useCreateIndex: true
-})
+})*/
+
+//middelware
 const app = express();
-app.use('/', express.static(path.join(__dirname, 'static')));
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use('/ressources',ressourcesRoutes);
 app.use(bodyParser.json()) //decode the body if it is json
 
+
+//routes
+app.use('/', express.static(path.join(__dirname, 'static')));
+
+//change password
 app.post('/api/change-password', async (req, res) => {
     const { token, newpassword: plainTextPassword  } = req.body
 
@@ -46,6 +63,12 @@ app.post('/api/change-password', async (req, res) => {
 
 })
 
+
+
+app.get('/login',(req,res)=>{
+    res.sendFile(path.join(__dirname, '/static/login.html'));
+})
+//login
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body
     const user = await User.findOne({ username }).lean()
@@ -63,13 +86,15 @@ app.post('/api/login', async (req, res) => {
             }, 
             JWT_SECRET
         )
-
-        return res.json({ status: 'ok', data: token })
+        //add the token to the cookies
+        res.cookie('token',token);
+        return res.json({ status: 'ok'});//res.json({ status: 'ok', data: token })
     }
 
     res.json({ status: 'error', error: 'Invalid username/password' })
 })
 
+//registeration
 app.post('/api/register', async (req, res) => {
     const { username, password: plainTextPassword } = req.body
 
@@ -107,33 +132,13 @@ app.post('/api/register', async (req, res) => {
 })
 
 
-//requirement
-const ressourcesDb=require('./models/db_ressources');
-var ressourcesRoutes=require('./routes/ressources');
-require('dotenv').config();
 
-//global variable
-
-const port=process.env.PORT;
-const connectionUrl=process.env.CONNECTIONURL;
 
 /*
 if u dont have the .env file here is the port and url to test the API
 PORT=4000
 CONNECTIONURL=mongodb+srv://imadbourouche:KDL3BtUM7wZe6q@cluster0.agb2b.mongodb.net/RessourcesDb?retryWrites=true&w=majority
 */
-
-
-//middelware
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use('/ressources',ressourcesRoutes);
-
-
-//main
-app.get('/',function(req,res){
-    res.status(200).send("HOME");
-});
 
 //running the app
 app.listen(port,()=>{

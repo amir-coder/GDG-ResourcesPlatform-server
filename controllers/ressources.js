@@ -1,6 +1,5 @@
 const ressourcesDb=require('../models/db_ressources');
-const verificatioin=require('./verification');
-
+const mongoose=require('mongoose');
 
 //get all ressources from db
 //admin + user
@@ -11,7 +10,7 @@ module.exports.getAllRessources= async (req,res)=>{
         res.status(200).send(allRessources);
     }catch(err){
         console.log("Getting all ressources failed"+err);
-        res.status(500).send(err);
+        res.status(500).send("Error");
     }
 }
 
@@ -20,11 +19,15 @@ module.exports.getAllRessources= async (req,res)=>{
 module.exports.getRessourceById= async (req,res)=>{
     try{
         const oneRessource = await ressourcesDb.findById(req.params.id_ressource);
+        if(oneRessource){
+            res.status(200).send(oneRessource);
+        }else{
+            res.status(404).send("Not found");
+        }
         console.log(`LOGS: Getting ressource with id = ${req.params.id_ressource}`);
-        res.status(200).send(oneRessource);
     }catch(err){
         console.log("Getting the record with id failed"+err);
-        res.status(500).send(err);
+        res.status(500).send("Error");
     }
 }
 
@@ -35,15 +38,13 @@ module.exports.getRessourceById= async (req,res)=>{
 //admin + user
 module.exports.addRessource=async(req,res,next)=>{
     try{
-
-        await verificatioin.verifieRessource(req);
-        console.log("LOGS: Verification successeded");
+        req.body.owner=mongoose.Types.ObjectId(req.decodedToken.id);
         await ressourcesDb.create(req.body);
         console.log("LOGS: Adding ressource");
-        res.status(201).send("SUCCESS: Creation succeeded still the validation from the admin");
+        res.status(200).send("SUCCESS: Creation succeeded");
     }catch(err){
         console.log("creation failed "+err.message);
-        res.status(500).send(err);
+        res.status(500).send("Error");
     }
 }
 
@@ -51,12 +52,17 @@ module.exports.addRessource=async(req,res,next)=>{
 //admin
 module.exports.deleteRessource=async(req,res)=>{
     try{
-        await ressourcesDb.findByIdAndDelete(req.params.id_ressource);
-        console.log(`LOGS: suppression succeded of article with id= ${req.params.id_ressource}`);
-        res.status(205).send("SUCCESS: suppression succeded of article");
+        const ressourceToDelete=await ressourcesDb.findById(req.params.id_ressource);
+        if(ressourceToDelete){
+            await ressourcesDb.deleteOne({_id:req.params.id_ressource});
+            console.log(`LOGS: suppression succeded of article with id= ${req.params.id_ressource}`);
+            res.status(200).send("SUCCESS: suppression succeded of ressource");
+        }else{
+            res.status(401).send("Ressources not found");
+        }
     }catch(err){
         console.log("suppression failed\n"+err);
-        res.status(500).send(err);
+        res.status(500).send("Error");
     }
 }
 
@@ -66,11 +72,20 @@ module.exports.deleteRessource=async(req,res)=>{
 // admin
 module.exports.validateRessource=async(req,res)=>{
     try{
-        await ressourcesDb.findByIdAndUpdate(req.params.id_ressource,{isvalid: true});
-        console.log(`LOGS: validation succeded of article with id= ${req.params.id_ressource}`);
-        res.status(200).send("SUCCESS: validation successded for the ressource");
+        const ressourceToValidate=await ressourcesDb.findById(req.params.id_ressource);
+        if(ressourceToValidate){
+            if(ressourceToValidate.isvalid){
+                res.status(200).send("Already updated");
+            }else{
+                await ressourcesDb.updateOne({_id:req.params.id_ressource},{isvalid: true});
+                console.log(`LOGS: validation succeded of article with id= ${req.params.id_ressource}`);
+                res.status(200).send("SUCCESS: validation successded for the ressource");
+            }
+        }else{
+            res.status(404).send("Ressources not found");
+        }
     }catch(err){
         console.log("Updating failed\n"+err);
-        res.status(500).send("Updating failed");
+        res.status(500).send("Validation failed");
     }
 }
