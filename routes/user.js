@@ -8,5 +8,5 @@ router.use(cookieParser());
 router.post("/api/change-password",userController.changePassword);
 router.post("/api/login",userController.login);
 router.post("/api/register",userController.register);
-
+router.post("/api/user-profile",userController.editProfile)
 module.exports = router

@@ -4,9 +4,29 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'fuhè_yhèoué"hezjhgçèàhjzhç_puhrjgnçpj[#`|~`ihàjoim~#|[{\||[#{|[#['
 
+module.exports.editProfile = async (req, res) => {
+    const {  newFullName: fullName, newDiscordId: discordId, } = req.body
+    const token = req.cookies.token
+
+    try {
+        const user = jwt.verify(token, JWT_SECRET)
+        const _id = user.id
+        // const fullName = newFullName
+        // const discordId = newDiscordId
+        const userubdate = await User.findById(_id);
+        userubdate.fullName = await fullName;
+        userubdate.discordId = await discordId;
+        await userubdate.save();
+        res.json({ status: 'ok' })
+    } catch (error) {
+        res.json({ status: 'error', error: error })
+    }
+
+}
 
 module.exports.changePassword =  async (req, res) => {
-    const { token, newpassword: plainTextPassword  } = req.body
+    const {  newpassword: plainTextPassword  } = req.body
+    const token = req.cookies.token
 
     if (!plainTextPassword || typeof plainTextPassword !== 'string') {
         return res.json({ status: 'error', error: 'Invalid password' })
@@ -59,7 +79,7 @@ module.exports.login  =  async (req, res) => {
 }
 
 module.exports.register = async (req, res) => {
-    const { username, password: plainTextPassword } = req.body
+    const { username, email, fullName, discordId, password: plainTextPassword } = req.body
 
     if (!username || typeof username !== 'string') {
         return res.json({ status: 'error', error: 'Invalid username' })
@@ -80,7 +100,11 @@ module.exports.register = async (req, res) => {
     try {
         const response = await User.create({
             username,
-            password
+            email,
+            password,
+            fullName,
+            discordId,
+            
         })
         const token = jwt.sign(
             { 
