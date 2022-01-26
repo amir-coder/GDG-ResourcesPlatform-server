@@ -9,7 +9,8 @@
 <body>
     <h1>Login</h1>
     <form action="" id="login">
-        <input type="text" autocomplete="off" id="username" placeholder="Username"/>
+        <!-- <input type="text" autocomplete="off" id="username" placeholder="Username"/> -->
+        <input type="email" autocomplete="off" id="email" placeholder="Email">
         <input type="password" autocomplete="off" id="password" placeholder="password"/>
         <input type="submit" value="Submit Form"/>
     </form>
@@ -22,7 +23,8 @@
         //2. send data as urlencoded  
         async function login(event) {
             event.preventDefault()
-            const username = document.getElementById('username').value
+            // const username = document.getElementById('username').value
+            const email = document.getElementById('email').value
             const password = document.getElementById('password').value
 
             const result = await fetch('/api/login', {
@@ -31,7 +33,8 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    username,
+                    //username,
+                    email,
                     password
                 })
             }).then((res) => res.json())
