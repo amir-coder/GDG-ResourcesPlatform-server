@@ -6,6 +6,7 @@ const mongoose=require('mongoose');
 //admin + user
 module.exports.getAllRessources= async (req,res)=>{
     try{
+        console.log("fffll")
         const allRessources= await ressourcesDb.find();
         console.log('LOGS: Getting all ressources');
         res.status(200).send(allRessources);

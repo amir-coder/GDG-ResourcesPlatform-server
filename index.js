@@ -10,18 +10,24 @@ const mongoose = require('mongoose');
 const User = require('./model/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
 //global variable
 const port=process.env.PORT || 4000;
 const connectionUrl=process.env.CONNECTIONURL || "mongodb://localhost:27017/GDG_Ressorce_Server";
 
 //middelware
 const app = express();
+
+// enable CORS using npm package
+var cors = require('cors');
+app.use(cors());
+
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(bodyParser.json()) //decode the body if it is json
 app.use('/ressources',ressourcesRoutes);
 app.use("/user",userRouter)
+
 
 //running the app
 app.listen(port,()=>{

@@ -4,9 +4,29 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'fuhè_yhèoué"hezjhgçèàhjzhç_puhrjgnçpj[#`|~`ihàjoim~#|[{\||[#{|[#['
 
+module.exports.getInfo = async (req , res) => {
+    const {token } = req.body
+    try {
+        const user = jwt.verify(token, JWT_SECRET)
+        const _id = user.id
+        // const fullName = newFullName
+        // const discordId = newDiscordId
+        const userubdate = await User.findById(_id);
+        res.send({status : "ok" , values : {
+             username : userubdate.username ,
+             email : userubdate.email ,
+             fullName : userubdate.fullName ,
+              discordId : userubdate.discordId}
+             })
+    }
+    catch(e) {
+        res.send({status : "error"})
+    }
+}
+
 module.exports.editProfile = async (req, res) => {
-    const {  newFullName: fullName, newDiscordId: discordId, } = req.body
-    const token = req.cookies.token
+    const {token,username ,  fullName, discordId, email, } = req.body
+    console.log(username ,fullName ,)
 
     try {
         const user = jwt.verify(token, JWT_SECRET)
@@ -14,8 +34,11 @@ module.exports.editProfile = async (req, res) => {
         // const fullName = newFullName
         // const discordId = newDiscordId
         const userubdate = await User.findById(_id);
-        userubdate.fullName = await fullName;
-        userubdate.discordId = await discordId;
+        userubdate.fullName =  fullName ? fullName : userubdate.fullName ;
+        userubdate.discordId = discordId ? discordId : userubdate.discordId ;
+        userubdate.email = email ? email : userubdate.email ;
+        userubdate.username = username ? username : userubdate.username ;
+        console.log(userubdate)
         await userubdate.save();
         res.json({ status: 'ok' })
     } catch (error) {
@@ -54,8 +77,8 @@ module.exports.changePassword =  async (req, res) => {
 }
 
 module.exports.login  =  async (req, res) => {
-    const { username, password } = req.body
-    const user = await User.findOne({ username }).lean()
+    const { email, password } = req.body
+    const user = await User.findOne({ email }).lean()
 
     if(!user) {
         return res.json({ status: 'error', error: 'Invalid username/password'})
